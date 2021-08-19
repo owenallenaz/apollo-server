@@ -176,7 +176,10 @@ export interface ServerInfo<AS extends ApolloServerBase> {
 export interface CreateServerFunc<AS extends ApolloServerBase> {
   (
     config: Config,
-    options?: { suppressStartCall?: boolean; graphqlPath?: string },
+    options?: {
+      suppressStartCall?: boolean;
+      graphqlPath?: string;
+    },
   ): Promise<ServerInfo<AS>>;
 }
 
@@ -437,11 +440,9 @@ export function testApolloServer<AS extends ApolloServerBase>(
             );
             triggers.rejectLoad(loadError);
 
-            await expect(
-              createApolloServer({
-                gateway,
-              }),
-            ).rejects.toThrowError(loadError);
+            await expect(createApolloServer({ gateway })).rejects.toThrowError(
+              loadError,
+            );
           });
 
           it('not calling start causes a clear error', async () => {
