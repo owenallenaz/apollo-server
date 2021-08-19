@@ -2175,16 +2175,19 @@ export function testApolloServer<AS extends ApolloServerBase>(
     describe('Response caching', () => {
       let clock: FakeTimers.Clock;
       beforeAll(() => {
-        clock = FakeTimers.install();
+        // These tests use the default InMemoryLRUCache, which is backed by the
+        // lru-cache npm module, whose maxAge feature is based on `Date.now()`
+        // (no setTimeout or anything like that). So we want to use fake timers
+        // just for Date. (Faking all the timer methods messes up things like a
+        // setImmediate in ApolloServerPluginDrainHttpServer.)
+        clock = FakeTimers.install({ toFake: ['Date'] });
       });
 
       afterAll(() => {
         clock.uninstall();
       });
 
-      //FIXME unonly
-      //FIXME make pass. maybe requires grace period 0?
-      it.only('basic caching', async () => {
+      it('basic caching', async () => {
         const typeDefs = gql`
           type Query {
             cached: String @cacheControl(maxAge: 10)

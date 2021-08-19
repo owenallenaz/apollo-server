@@ -35,14 +35,13 @@ const resolvers = {
 };
 
 describe('apollo-server-express', () => {
-  let server: ApolloServer;
-  let cleanup: (() => Promise<void>) | null;
+  let serverToCleanUp: ApolloServer | null = null;
   testApolloServer(
     async (config: ApolloServerExpressConfig, options) => {
-      cleanup = null;
+      serverToCleanUp = null;
       const app = express();
       const httpServer = http.createServer(app);
-      server = new ApolloServer({
+      const server = new ApolloServer({
         ...config,
         plugins: [
           ...(config.plugins ?? []),
@@ -53,9 +52,7 @@ describe('apollo-server-express', () => {
       });
       if (!options?.suppressStartCall) {
         await server.start();
-        cleanup = async () => {
-          await server?.stop();
-        };
+        serverToCleanUp = server;
       }
       server.applyMiddleware({ app, path: options?.graphqlPath });
       await new Promise((resolve) => {
@@ -65,7 +62,7 @@ describe('apollo-server-express', () => {
       return createServerInfo(server, httpServer);
     },
     async () => {
-      await cleanup?.();
+      await serverToCleanUp?.stop();
     },
   );
 });
