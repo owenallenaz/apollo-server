@@ -2182,7 +2182,9 @@ export function testApolloServer<AS extends ApolloServerBase>(
         clock.uninstall();
       });
 
-      it('basic caching', async () => {
+      //FIXME unonly
+      //FIXME make pass. maybe requires grace period 0?
+      it.only('basic caching', async () => {
         const typeDefs = gql`
           type Query {
             cached: String @cacheControl(maxAge: 10)
